@@ -29,6 +29,7 @@ const propertySchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },  // Owner or agent who listed the property
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
+  // video: { type: String, required: true },
   images: [{ type: Schema.Types.ObjectId, ref: 'PropertyImage' }],  // Array of image references
   isActive: {type: Boolean,default: true},
 });

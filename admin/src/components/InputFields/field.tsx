@@ -56,6 +56,74 @@ export const TextInput = ({ name, onChange, value, label, ...props }: any) => {
   );
 };
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
+export const CustomVideo = ({ field, form, label, error, helperText, ...props }: any) => {
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
+  // Handle video file selection and preview
+  const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const videoURL = URL.createObjectURL(file);
+      setVideoPreview(videoURL);
+      form.setFieldValue(field.name, file); // Update Formik field value
+    }
+  };
+
+  return (
+    <Box>
+      {/* Button with hidden file input */}
+      <Button
+        component="label"
+        variant="outlined"
+        fullWidth
+        sx={{
+          border: `1px dashed ${error ? 'rgba(255,86,48,0.5)' : '#637381'}`,
+          backgroundColor: 'rgba(249,249,249,0.9)', // Background color
+          padding: '0.50rem 2rem',
+          color: error ? 'rgb(255,86,48)' : '#131313',
+          fontWeight: '400',
+          '&:hover': {
+            backgroundColor: error ? 'rgba(255,86,48,0.2)' : 'rgba(236,236,236,1)',
+            border: '1px dashed #637381',
+          },
+        }}
+      >
+        {label || 'Select Video'}
+        <VisuallyHiddenInput
+          type="file"
+          accept="video/*"
+          onChange={handleVideoChange}
+          id={field.name}
+          aria-label="Upload Video"
+        />
+      </Button>
+
+      {/* Helper text for error */}
+      {helperText && <Typography color="error">{helperText}</Typography>}
+
+      {/* Video preview */}
+      {videoPreview && (
+        <Box mt={2}>
+          <video controls src={videoPreview} width="100%" style={{ borderRadius: '4px', height: '200px' }} />
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+
 export const CustomDatePicker = ({
   name,
   attribute,
@@ -389,9 +457,9 @@ export const CustomSelect = ({
   helperText,
   label,
   error,
-  options=[],
+  options = [],
   loading = false,
-  noFound='',
+  noFound = '',
   ...props
 }: any) => {
   return (
@@ -430,7 +498,7 @@ export const CustomSelect = ({
   );
 };
 
-export const CommonDropZone = ({ uploadType = 'multiple', onUpload, setFieldValue, error, old_images, }: any) => {
+export const CommonDropZone = ({ uploadType = 'multiple', onUpload, setFieldValue, error, old_images }: any) => {
   const [files, setFiles] = useState<any[]>([]);
 
   const onDrop = useCallback(
@@ -475,7 +543,8 @@ export const CommonDropZone = ({ uploadType = 'multiple', onUpload, setFieldValu
   const { getRootProps, getInputProps }: any = useDropzone({
     onDrop,
     accept: {
-      'image/*': [], // Corrected type for accept
+      'image/*': [],  // Accept all image file types
+      'video/*': [],  // Accept all video file types
     } as Accept,
     multiple: uploadType === 'multiple',
   });
@@ -566,7 +635,7 @@ export const CommonDropZone = ({ uploadType = 'multiple', onUpload, setFieldValu
               border: '1px solid #EEE',
             }}
           >
-            <Avatar
+            {/* <Avatar
               src={file.preview}
               alt={file.name}
               sx={{
@@ -574,7 +643,27 @@ export const CommonDropZone = ({ uploadType = 'multiple', onUpload, setFieldValu
                 height: 90,
                 borderRadius: 0,
               }}
-            />
+            /> */}
+             {file.type.startsWith('image/') ? (
+              <Avatar
+                src={file.preview}
+                alt={file.name}
+                sx={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 0,
+                }}
+              />
+            ) : (
+              <video
+                src={file.preview}
+                controls
+                width={90}
+                height={90}
+                autoPlay
+                style={{ objectFit: 'cover', borderRadius: 0 }}
+              />
+            )}
             <IconButton
               onClick={() => handleRemoveFile(index)}
               size="small"
@@ -600,7 +689,7 @@ export const CommonExcellDropZone = ({ uploadType = 'single', onUpload, setField
   const [files, setFiles] = useState<any[]>([]);
 
   const onDrop = useCallback(
-    (acceptedFiles: any,rejectedFiles:any) => {
+    (acceptedFiles: any, rejectedFiles: any) => {
       if (rejectedFiles.length > 0) {
         toastNotificationAdmin.error('Invalid file type! Please upload an Excel or CSV file.')
         return;

@@ -11,12 +11,11 @@ import { Navigation, Pagination } from 'swiper/modules';
 import useWindowWidth from 'hooks/windowWidth';
 import { BiBed, BiMap, BiMapAlt, BiTab } from "react-icons/bi";
 import { FaCity, FaFlagUsa, FaFortAwesome, FaMapMarkerAlt, FaHeart, FaRegHeart, FaPhone } from "react-icons/fa";
-import { BsCurrencyDollar } from "react-icons/bs";
 import moment from 'moment';
 import { MdEmail } from "react-icons/md";
 import { HiOfficeBuilding } from "react-icons/hi";
 import { TbLicense } from "react-icons/tb";
-
+import { GiPostOffice } from "react-icons/gi";
 
 const PropertyDetails = () => {
     const { id } = useParams();
@@ -27,13 +26,11 @@ const PropertyDetails = () => {
     const detailLoading = isApiStatus?.propertyDetailApi === 'loading';
     const darkMode = useSelector((state) => state.ui.darkMode);
     const width = useWindowWidth();
-
     useEffect(() => {
         if (id) {
             dispatch(propertyDetailApi({ id }));
         }
     }, [id, dispatch]);
-
     const title = isPropertyDetail?.title;
     const description = isPropertyDetail?.description;
     const availibility = isPropertyDetail?.availibility;
@@ -49,7 +46,6 @@ const PropertyDetails = () => {
     const owner = isPropertyDetail?.owner;
     const created_at = isPropertyDetail?.created_at ? moment(isPropertyDetail?.created_at).format('Do MMMM YYYY') : '';
     const relativeTime = isPropertyDetail?.created_at ? moment(isPropertyDetail?.created_at).fromNow() : '';
-
     return (
         <div className="pt-20 px-[3%] md:px-[6%]">
 
@@ -225,14 +221,15 @@ const PropertyDetails = () => {
                                             </CustomText>
                                         </Box>
                                     </Box>
+                                    <CustomDivider orientation='vertical' stylings={{ height: 'auto', mx: 2 }} />
                                     <Box display={'flex'} flexDirection={'row'} sx={{ mb: 2 }}>
                                         <div className="icon-box !w-7 !h-7 bg-primary/20 hover:!bg-primary/40 text-primary mr-2">
-                                            <FaMapMarkerAlt />
+                                            <GiPostOffice />
                                         </div>
                                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                                 <CustomText variant='body1' stylings={{ fontWeight: 'bold' }}>
-                                                    Zip C
+                                                    Zip Code
                                                 </CustomText>
                                             </Box>
                                             <CustomText variant='h6' stylings={{ fontWeight: '500' }}>
@@ -341,5 +338,4 @@ const PropertyDetails = () => {
         </div>
     );
 };
-
 export default PropertyDetails;

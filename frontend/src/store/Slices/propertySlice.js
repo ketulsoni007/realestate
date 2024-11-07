@@ -88,7 +88,7 @@ export const propertyDetailApi = createAsyncThunk('property/details', async (for
 });
 
 const initialState = {
-    ispropertyListData: [],
+    isPropertyListData: [],
     isPropertyCategoryList: [],
     isPropertyFeatureList: [],
     isPropertySearchList: [],
@@ -178,11 +178,11 @@ const propertySlice = createSlice({
                 state.isApiStatus = { ...state.isApiStatus, propertyListApi: 'loading' };
             })
             .addCase(propertyListApi.fulfilled, (state, action) => {
-                state.ispropertyListData = action.payload;
+                state.isPropertyListData = action.payload;
                 state.isApiStatus = { ...state.isApiStatus, propertyListApi: 'succeeded' };
             })
             .addCase(propertyListApi.rejected, (state) => {
-                state.ispropertyListData = [];
+                state.isPropertyListData = [];
                 state.isApiStatus = { ...state.isApiStatus, propertyListApi: 'failed' };
             });
     },

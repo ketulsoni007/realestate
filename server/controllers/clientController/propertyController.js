@@ -160,7 +160,7 @@ export const propertyDetailController = async (req, res) => {
       .populate('images')
       .populate({
         path:'owner',
-        select:'_id first_name last_name email phone_number agency_name license_number'
+        select:'_id first_name last_name email phone_number profile_picture agency_name license_number'
       })
       .exec();
 

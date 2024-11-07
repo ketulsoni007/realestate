@@ -26,13 +26,13 @@ const SingleProductCard = ({
       } shadow-light dark:border-card-dark border rounded-lg overflow-hidden relative group`}
     >
       <div className="group !opacity-100 overflow-hidden relative">
-        <Link to="/" className="!opacity-100">
+        <a href="javascript:void(0)" className="!opacity-100">
           <img
             src={imageLink}
             alt={title}
             className="w-full  h-fit md:h-[250px] object-cover group-hover:scale-125 transition-a"
           />
-        </Link>
+        </a>
         <CardHoverIcons />
         <div className="absolute bottom-0 left-0 w-full px-2 py-2 transition-transform bg-gradient-to-t from-black/80 sm:translate-y-10 group-hover:translate-y-0 to-transparent">
           <div className="text-white flex-align-center gap-x-2">
@@ -43,9 +43,9 @@ const SingleProductCard = ({
       </div>
       <CardLabels purpose={status} distance={type} />
       <div className="p-3">
-        <Link to="/" className="group-hover:text-primary transition-a">
-          <h1 className="text-lg font-bold capitalize">{title}</h1>
-        </Link>
+        <a href="javascript:void(0)" className="group-hover:text-primary transition-a">
+          <h1 className="text-lg font-bold capitalize" onClick={()=>navigate(`/property/${_id}`)}>{title}</h1>
+        </a>
         <div className="flex justify-between mt-3">
           <div className="flex-align-center gap-x-2">
             <div className="icon-box !w-7 !h-7 bg-primary/20 hover:!bg-primary/40 text-primary">

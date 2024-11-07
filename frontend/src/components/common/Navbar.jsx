@@ -14,8 +14,10 @@ import { Logout, PersonAdd, Settings } from "@mui/icons-material";
 import { authLogoutApi } from "../../store/Slices/authSlice";
 import { CustomDivider, CustomText } from "../fields/field";
 import { PropertySearchListReset, PropertySearchText, propertySearchListApi } from "store/Slices/propertySlice";
+import useWindowWidth from "hooks/windowWidth";
 
 const Navbar = () => {
+  const width = useWindowWidth();
   const rootDoc = document.querySelector(":root");
   const { darkMode, isSidebarOpen } = useSelector((state) => state.ui);
   const user = useSelector((state) => state.auth.user);
@@ -126,7 +128,7 @@ const Navbar = () => {
             </div>
             {showSearchBar && isPropertySearchList?.length > 0 && (
               <>
-                <div className="absolute " style={{ bottom: '-228px', left: 0, background: `${darkMode ? 'rgb(53 57 73)' : 'rgb(255 255 255)'}`, minWidth: '320px', maxWidth: '320px', padding: '8px', minHeight: '220px', maxHeight: '220px', overflow: 'auto', boxShadow: "0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)" }}>
+                <div className="absolute " style={{ bottom: '-228px', left: width < 900 ? -31 : 0, background: `${darkMode ? 'rgb(53 57 73)' : 'rgb(255 255 255)'}`, minWidth: '320px', maxWidth: '320px', padding: '8px', minHeight: '220px', maxHeight: '220px', overflow: 'auto', boxShadow: "0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)" }}>
                   {isPropertySearchList.map((item, index) => {
                     const imageLinks = item?.images && item?.images.length > 0 ? `${config.IMAGE_URL}/property/${item.images[0].image}` : '';
                     const title = item?.title;

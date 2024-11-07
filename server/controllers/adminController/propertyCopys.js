@@ -15,18 +15,13 @@ dotenv.config();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Check the file type and set the destination directory
-    if (file.mimetype.startsWith("image")) {
-      cb(null, "public/images/property"); // Store images in "public/images/property"
-    } else if (file.mimetype.startsWith("video")) {
-      cb(null, "public/videos/property"); // Store videos in "public/videos/property"
-    } else {
-      cb(new Error("Unsupported file type"), false); // Reject unsupported file types
-    }
+    cb(null, "public/images/property");
   },
   filename: (req, file, cb) => {
-    // Generate a unique filename using current timestamp and random number
-    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
   },
 });
 

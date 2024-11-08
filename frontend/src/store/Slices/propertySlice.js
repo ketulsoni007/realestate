@@ -87,6 +87,20 @@ export const propertyDetailApi = createAsyncThunk('property/details', async (for
     }
 });
 
+export const propertyContactApi = createAsyncThunk('property/contact', async (formValues, thunkAPI) => {
+    try {
+        const response = await propertyApiController.propertyContact(formValues);
+        return handleResponse(response, thunkAPI)
+    } catch (error) {
+        handleError(error, thunkAPI);
+        const errorMessage =
+            (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+        const status = error?.response?.status ?? 410;
+        const errors = error?.response?.data?.errors ?? '';
+        return thunkAPI.rejectWithValue({ status: status, message: errorMessage, errors: errors });
+    }
+});
+
 const initialState = {
     isPropertyListData: [],
     isPropertyCategoryList: [],
@@ -102,6 +116,7 @@ const initialState = {
         propertySearchListApi: "",
         propertyFilterListApi: "",
         propertyDetailApi: "",
+        propertyContactApi:"",
     },
 };
 
@@ -116,9 +131,21 @@ const propertySlice = createSlice({
         PropertySearchText: (state, action) => {
             state.isSearchFilterText = action.payload;
         },
+        PropertyWishListToggle: (state, action) => {
+            state.isPropertyDetail = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
+            .addCase(propertyContactApi.pending, (state) => {
+                state.isApiStatus = { ...state.isApiStatus, propertyContactApi: 'loading' };
+            })
+            .addCase(propertyContactApi.fulfilled, (state, action) => {
+                state.isApiStatus = { ...state.isApiStatus, propertyContactApi: 'succeeded' };
+            })
+            .addCase(propertyContactApi.rejected, (state) => {
+                state.isApiStatus = { ...state.isApiStatus, propertyContactApi: 'failed' };
+            })
             .addCase(propertyDetailApi.pending, (state) => {
                 state.isApiStatus = { ...state.isApiStatus, propertyDetailApi: 'loading' };
             })
@@ -188,5 +215,5 @@ const propertySlice = createSlice({
     },
 });
 
-export const { reset, PropertySearchListReset, PropertySearchText } = propertySlice.actions;
+export const { reset, PropertySearchListReset, PropertySearchText,PropertyWishListToggle } = propertySlice.actions;
 export default propertySlice.reducer;

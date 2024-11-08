@@ -21,7 +21,7 @@ const propertySearchList = (values) => {
 };
 
 const propertyDetail = (values) => {
-  const action = `/property/detail/${values?.id}`;
+  const action = `/property/detail/${values?.id}?user=${values?.user}`;
   return appAxios.get(action);
 };
 
@@ -47,13 +47,27 @@ const propertyFilterList = (values) => {
   // return appAxios.get(action);
 };
 
+const propertyContact = (values) => {
+  const action = `/property/contact`;
+  const formData = new FormData();
+  Object.keys(values).forEach((key) => {
+    formData.append(key, values[key]);
+  });
+  return appAxios.post(action, formData, {
+    headers: {
+      "Content-Type": "application/json"
+    },
+  });
+};
+
 const propertyApiController = {
   propertyList,
   propertyCategoryList,
   propertyFeatureList,
   propertySearchList,
   propertyFilterList,
-  propertyDetail
+  propertyDetail,
+  propertyContact
 };
 
 export default propertyApiController;

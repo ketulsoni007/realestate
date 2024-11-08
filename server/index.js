@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoute from "./routes/ClientRoute/authRoute.js";
 import propertyRoute from "./routes/ClientRoute/propertyRoute.js";
+import profileRoute from "./routes/ClientRoute/profileRoute.js";
 import adminAuthRoute from "./routes/AdminRoute/adminAuthRoute.js";
 import adminPropertyRoute from "./routes/AdminRoute/adminPropertyRoute.js";
 import adminCountryRoute from "./routes/AdminRoute/adminCountryRoute.js";
@@ -36,6 +37,7 @@ app.use(cors(corsOption));
 //Frontend Apis
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/property", propertyRoute);
+app.use("/api/v1/profile", profileRoute);
 //Admin Apis
 app.use("/api/v1/admin/auth", adminAuthRoute);
 app.use("/api/v1/admin/property", adminPropertyRoute);

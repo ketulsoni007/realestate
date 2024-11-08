@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { propertyDetailApi } from 'store/Slices/propertySlice';
+import { propertyContactApi, propertyDetailApi, PropertyWishListToggle } from 'store/Slices/propertySlice';
 import ImageGallery from 'react-image-gallery';
 import "react-image-gallery/styles/css/image-gallery.css";
 import { Avatar, Typography, Box, Paper, Grid, Skeleton, Card, Button, CardContent, CardActions, Alert, List, ListItem, ListItemAvatar, ListItemText, Stack, Chip } from '@mui/material';
@@ -9,7 +9,7 @@ import config from 'config/config';
 import useWindowWidth from 'hooks/windowWidth';
 import { BiBed, BiMap, BiMapAlt, BiTab } from "react-icons/bi";
 import { FaCity, FaFlagUsa, FaFortAwesome, FaMapMarkerAlt, FaHeart, FaRegHeart, FaPhone, FaBolt, FaRupeeSign, FaHouseUser, FaCalendarAlt } from "react-icons/fa";
-import { IoIosPin,IoIosInformationCircle  } from "react-icons/io";
+import { IoIosPin, IoIosInformationCircle, IoLogoWhatsapp } from "react-icons/io";
 import moment from 'moment';
 import { MdEmail, MdOutlineSquareFoot } from "react-icons/md";
 import { HiOfficeBuilding } from "react-icons/hi";
@@ -18,9 +18,11 @@ import { GiPostOffice } from "react-icons/gi";
 import * as Yup from "yup";
 import { authLoginApi } from 'store/Slices/authSlice';
 import { Formik, Form, Field } from 'formik';
-import { CommonButton, CustomDivider, CustomText, IconInput, TextInput } from 'components/fields/field';
+import { CommonButton, CustomCheckBox, CustomDivider, CustomText, IconInput, TextInput } from 'components/fields/field';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-
+import { toastNotification } from 'components/CustomToast/CustomToast';
+import { wishListStoreApi } from 'store/Slices/profileSlice';
+import TickAnime from 'assets/images/anime.gif';
 const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
     phone: Yup.string().required('Phone is required'),
@@ -34,15 +36,10 @@ const PropertyDetails = () => {
     const [heart, setHeart] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const user = useSelector((state) => state.auth.user);
-    console.log('user: ', user);
     const isPropertyDetail = useSelector((state) => state.property.isPropertyDetail);
-    console.log('isPropertyDetail: ', isPropertyDetail);
     const isApiStatus = useSelector((state) => state.property.isApiStatus);
     const theme = useSelector((state) => state.ui.darkMode);
     const detailLoading = isApiStatus?.propertyDetailApi === 'loading';
-    const primaryImageLink = isPropertyDetail?.images?.find(image => image?.is_primary)?.image
-        ? `${config.IMAGE_URL}/property/${isPropertyDetail.images.find(image => image.is_primary).image}`
-        : '';
     const title = isPropertyDetail?.title;
     const description = isPropertyDetail?.description;
     const availibility = isPropertyDetail?.availibility;
@@ -56,58 +53,63 @@ const PropertyDetails = () => {
     const type = isPropertyDetail?.type;
     const year_built = isPropertyDetail?.year_built;
     const owner = isPropertyDetail?.owner;
+    const relativeTime = isPropertyDetail?.created_at ? moment(isPropertyDetail?.created_at).fromNow() : '';
     const created_at = isPropertyDetail?.created_at ? moment(isPropertyDetail?.created_at).format('Do MMMM YYYY') : '';
     const updated_at = isPropertyDetail?.updated_at ? moment(isPropertyDetail?.updated_at).format('Do MMMM YYYY') : '';
-    const relativeTime = isPropertyDetail?.created_at ? moment(isPropertyDetail?.created_at).fromNow() : '';
+    const primaryImageLink = isPropertyDetail?.images?.find(image => image?.is_primary)?.image ? `${config.IMAGE_URL}/property/${isPropertyDetail.images.find(image => image.is_primary).image}` : '';
 
     useEffect(() => {
         if (id) {
-            dispatch(propertyDetailApi({ id }));
+            dispatch(propertyDetailApi({ id, user: user?._id ? user?._id : '' }));
         }
     }, [id, dispatch]);
 
     const initialValues = useMemo(() => {
         return {
+            user: user?._id || '',
+            seller: isPropertyDetail?.owner?._id || '',
+            property: isPropertyDetail?._id || "",
+            inquiry: 'contact',
             name: user ? user?.first_name + " " + user?.last_name : "",
             phone: user?.phone_number || "",
             email: user?.email || "",
-            property: isPropertyDetail?._id || "",
+            agree: true,
         };
     }, [user, isPropertyDetail]);
 
     const handleSubmit = (values, { setErrors, setStatus, setSubmitting, resetForm }) => {
         try {
-            // dispatch(authLoginApi(values))
-            //     .then((action) => {
-            //         if (action?.meta?.requestStatus === "fulfilled") {
-            //             if (theme) {
-            //                 toastNotification.successDark('Login Success Full');
-            //             } else {
-            //                 toastNotification.successLight('Login Success Full');
-            //             }
-            //         } else if (action?.meta?.requestStatus === "rejected") {
-            //             const message = action?.payload?.message ?? 'Something went wrong';
-            //             const status = action?.payload?.status ?? 410;
-            //             const errors = action?.payload?.errors ?? [];
-            //             if (status === 422) {
-            //                 const formattedErrors = errors.reduce((acc, error) => {
-            //                     acc[error.path] = error.msg;
-            //                     return acc;
-            //                 }, {});
-            //                 setErrors(formattedErrors);
-            //             } else {
-            //                 if (theme) {
-            //                     toastNotification.errorDark(message);
-            //                 } else {
-            //                     toastNotification.errorLight(message);
-            //                 }
-            //                 setStatus({ error: message });
-            //             }
-            //         }
-            //     })
-            //     .finally(() => {
-            //         setSubmitting(false);
-            //     });
+            dispatch(propertyContactApi(values))
+                .then((action) => {
+                    if (action?.meta?.requestStatus === "fulfilled") {
+                        if (theme) {
+                            toastNotification.successDark('contact submitted successfull');
+                        } else {
+                            toastNotification.successLight('contact submitted successfull');
+                        }
+                    } else if (action?.meta?.requestStatus === "rejected") {
+                        const message = action?.payload?.message ?? 'Something went wrong';
+                        const status = action?.payload?.status ?? 410;
+                        const errors = action?.payload?.errors ?? [];
+                        if (status === 422) {
+                            const formattedErrors = errors.reduce((acc, error) => {
+                                acc[error.path] = error.msg;
+                                return acc;
+                            }, {});
+                            setErrors(formattedErrors);
+                        } else {
+                            if (theme) {
+                                toastNotification.errorDark(message);
+                            } else {
+                                toastNotification.errorLight(message);
+                            }
+                            setStatus({ error: message });
+                        }
+                    }
+                })
+                .finally(() => {
+                    setSubmitting(false);
+                });
         } catch (error) {
             console.error("An error occurred:", error);
             setStatus({ error: "An unexpected error occurred." });
@@ -126,7 +128,7 @@ const PropertyDetails = () => {
             alt=""
             style={{
                 width: '100%',
-                height: isFullscreen ? 'calc(100vh - 120px)' : width < 567 ? '300px' : '500px',
+                height: isFullscreen ? 'calc(100vh - 120px)' : width < 900 ? '300px' : '500px',
                 objectFit: 'cover'
             }}
         />
@@ -221,21 +223,21 @@ const PropertyDetails = () => {
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
                                     <Box component={Paper} elevation={2} p={2} sx={{ background: theme ? "rgb(37 40 54 / 0.6)" : "#FFF" }}>
-                                    <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
-                                        <CustomText variant='h5'>{title}</CustomText>
-                                        <Box display={'flex'} alignItems={'center'}>
-                                        <IoIosInformationCircle color={theme ? '#FFF' : '#131313'} className='mr-2' />           
-                                        <CustomText variant='body2'>Last updated at {updated_at}</CustomText>
+                                        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
+                                            <CustomText variant='h5'>{title}</CustomText>
+                                            <Box display={'flex'} alignItems={'center'}>
+                                                <IoIosInformationCircle color={theme ? '#FFF' : '#131313'} className='mr-2' />
+                                                <CustomText variant='body2'>Last updated at {updated_at}</CustomText>
+                                            </Box>
                                         </Box>
-                                    </Box>
                                         <Box display={'flex'} justifyContent={'flex-start'} alignItems={'center'} mb={2}>
                                             <IoIosPin color={theme ? '#FFF' : '#131313'} className='mr-2' />
                                             <CustomText variant='body2'>{address?.street}</CustomText>
                                         </Box>
                                         <Stack direction="row" spacing={1}>
-                                        <Chip label={`For ${status}`} sx={{ backgroundColor: 'rgba(255, 100, 0, 0.2)', color: 'rgb(255, 100, 0)', borderRadius: '4px' }} />
-                                        <Chip label={availibility} sx={{ backgroundColor: `${availibility === 'available' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 0, 0, 0.2)'}`, color: `${availibility === 'available' ? 'rgb(76, 175, 80)' : 'rgb(255, 0, 0)'}`, borderRadius: '4px' }} />
-                                    </Stack>
+                                            <Chip label={`For ${status}`} sx={{ backgroundColor: 'rgba(255, 100, 0, 0.2)', color: 'rgb(255, 100, 0)', borderRadius: '4px' }} />
+                                            <Chip label={availibility} sx={{ backgroundColor: `${availibility === 'available' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 0, 0, 0.2)'}`, color: `${availibility === 'available' ? 'rgb(76, 175, 80)' : 'rgb(255, 0, 0)'}`, borderRadius: '4px' }} />
+                                        </Stack>
                                         <div className="flex justify-start mt-3">
                                             <div className="flex-align-center gap-x-2">
                                                 <div className="icon-box !w-7 !h-7 bg-primary/20 hover:!bg-primary/40 text-primary">
@@ -297,54 +299,104 @@ const PropertyDetails = () => {
                         <Grid item xs={12} md={6} lg={4}>
                             <Box sx={{ position: 'sticky', top: 66 }}>
                                 <Formik initialValues={initialValues} enableReinitialize validationSchema={validationSchema} onSubmit={handleSubmit}>
-                                    {({ errors, touched, isSubmitting }) => (
-                                        <Form>
-                                            <Box sx={{ backgroundColor: theme ? "rgb(37 40 54 / 0.6)" : "#EEE", padding: 2, borderRadius: 2 }}>
-                                                <Alert
-                                                    severity='warning'
-                                                    iconMapping={{
-                                                        warning: <FaBolt fontSize="inherit" />,
-                                                    }}
-                                                    sx={{ mb: 2, backgroundColor: theme ? "rgb(37 40 54 / 0.6)" : 'rgb(255, 244, 229)' }}
-                                                >
-                                                    <CustomText stylings={{ fontSize: '13px' }}>Awesome! Most liked project in this area.</CustomText>
-                                                </Alert>
-                                                <List sx={{ background: theme ? "rgb(37 40 54 / 0.6)" : "#FFF", mb: 2, borderRadius: 1 }}>
-                                                    <ListItem>
-                                                        <ListItemAvatar>
-                                                            <Avatar src={`${config?.IMAGE_URL}/user/${owner?.profile_picture}`} sx={{ borderRadius: 1 }} />
-                                                        </ListItemAvatar>
-                                                        <ListItemText primary={owner?.first_name + " " + owner?.last_name} secondary={`+91 ${owner?.phone_number}`} secondaryTypographyProps={{ color: theme ? '#FFF' : '#131313' }} />
-                                                    </ListItem>
-                                                </List>
-                                                <Card sx={{ background: theme ? "#1C252E" : "#FFF" }}>
-                                                    <CardContent>
-                                                        <Grid container spacing={0}>
-                                                            <Grid item xs={12}>
-                                                                <Field name="name">{({ field }) => <TextInput variant='standard' {...field} label="name" type="text" error={touched.name && !!errors.name} helperText={touched.name && errors.name} />}</Field>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Field name="phone">{({ field }) => <IconInput variant='standard' {...field} label="phone" type="number" error={touched.phone && !!errors.phone} helperText={touched.phone && errors.phone} icon={
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="15" viewBox="0 0 25 15">
-                                                                        <rect width="25" height="5" fill="#FF9933" />
-                                                                        <rect width="25" height="5" y="5" fill="#ffffff" />
-                                                                        <rect width="25" height="5" y="10" fill="#138808" />
-                                                                        <circle cx="12.5" cy="7.5" r="2" fill="#000080" />
-                                                                    </svg>
-                                                                } />}</Field>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Field name="email">{({ field }) => <TextInput variant='standard' {...field} label="email" type="email" error={touched.email && !!errors.email} helperText={touched.email && errors.email} />}</Field>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <CommonButton size="small" variant='orange' sx={{ width: '100%' }}>Contact Agent</CommonButton>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </CardContent>
-                                                </Card>
-                                            </Box>
-                                        </Form>
-                                    )}
+                                    {({ errors, touched, isSubmitting, values }) => {
+                                        console.log('values: ', values);
+                                        return (
+                                            <Form>
+                                                <Box sx={{ backgroundColor: theme ? "rgb(37 40 54 / 0.6)" : "#EEE", padding: 2, borderRadius: 2 }}>
+                                                    <Alert
+                                                        severity='warning'
+                                                        iconMapping={{
+                                                            warning: <FaBolt fontSize="inherit" />,
+                                                        }}
+                                                        sx={{ mb: 2, backgroundColor: theme ? "rgb(37 40 54 / 0.6)" : 'rgb(255, 244, 229)' }}
+                                                    >
+                                                        <CustomText stylings={{ fontSize: '13px' }}>Awesome! Most liked project in this area.</CustomText>
+                                                    </Alert>
+                                                    <List sx={{ background: theme ? "rgb(37 40 54 / 0.6)" : "#FFF", mb: 2, borderRadius: 1 }}>
+                                                        <CustomText stylings={{ padding: '8px 0px 0px 16px' }}>Contact seller</CustomText>
+                                                        <ListItem>
+                                                            <ListItemAvatar>
+                                                                <Avatar src={`${config?.IMAGE_URL}/user/${owner?.profile_picture}`} sx={{ borderRadius: 1 }} />
+                                                            </ListItemAvatar>
+                                                            <ListItemText primary={owner?.first_name + " " + owner?.last_name} secondary={`+91 ${owner?.phone_number}`} secondaryTypographyProps={{ color: theme ? '#FFF' : '#131313' }} />
+                                                        </ListItem>
+                                                    </List>
+                                                    <Card sx={{ background: theme ? "#1C252E" : "#FFF", mb: 2 }}>
+                                                        <CardContent>
+                                                            {isPropertyDetail?.alreadyContact ? (
+                                                                <Grid container spacing={0}>
+                                                                    <Grid item xs={12}>
+                                                                    <Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+                                                                      <Box><Avatar src={TickAnime} sx={{width:'120px',height:'120px'}} /></Box>
+                                                                      <CustomText mt={theme ? 2 : 0}>Your request has been submitted successfully. An agent will contact you soon.</CustomText>
+                                                                    </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            ) : (
+                                                                <Grid container spacing={0}>
+                                                                    <Grid item xs={12}>
+                                                                        <Field name="name">{({ field }) => <TextInput variant='standard' disabled={user?.first_name && user?.last_name ? true : false} {...field} label="name" type="text" error={touched.name && !!errors.name} helperText={touched.name && errors.name} />}</Field>
+                                                                    </Grid>
+                                                                    <Grid item xs={12}>
+                                                                        <Field name="phone">{({ field }) => <IconInput variant='standard' {...field} label="phone" type="number" error={touched.phone && !!errors.phone} helperText={touched.phone && errors.phone} disabled={user?.phone_number ? true : false} icon={
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="15" viewBox="0 0 25 15">
+                                                                                <rect width="25" height="5" fill="#FF9933" />
+                                                                                <rect width="25" height="5" y="5" fill="#ffffff" />
+                                                                                <rect width="25" height="5" y="10" fill="#138808" />
+                                                                                <circle cx="12.5" cy="7.5" r="2" fill="#000080" />
+                                                                            </svg>
+                                                                        } />}</Field>
+                                                                    </Grid>
+                                                                    <Grid item xs={12}>
+                                                                        <Field name="email">{({ field }) => <TextInput variant='standard' {...field} disabled={user?.email ? true : false} label="email" type="email" error={touched.email && !!errors.email} helperText={touched.email && errors.email} />}</Field>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} mb={2}>
+                                                                        <Field name="agree">
+                                                                            {({ field }) => (
+                                                                                <CustomCheckBox
+                                                                                    {...field}
+                                                                                    label={
+                                                                                        <>
+                                                                                            I agree to be contacted by the agents via <span><IoLogoWhatsapp color='#25D366' style={{ display: 'inline' }} /> WhatsApp</span>, SMS, phone, email, etc.
+                                                                                        </>
+                                                                                    }
+                                                                                    error={touched.agree && !!errors.agree}
+                                                                                    helperText={touched.agree && errors.agree}
+                                                                                />
+                                                                            )}
+                                                                        </Field>
+                                                                    </Grid>
+                                                                    <Grid item xs={12}>
+                                                                        <CommonButton size="small" variant='orange' sx={{ width: '100%' }} type='submit'>Contact Agent</CommonButton>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            )}
+                                                        </CardContent>
+                                                    </Card>
+                                                    <Card sx={{ background: theme ? "#1C252E" : "#FFF" }} elevation={0}>
+                                                        <CardContent>
+                                                            <Stack display={'flex'} flexDirection={'row'} justifyContent={'space-between'} alignItems={'flex-start'}>
+                                                                <Box>
+                                                                    <CustomText stylings={{ fontWeight: 'bold' }} variant='body1'>Still deciding?</CustomText>
+                                                                    <CustomText variant='body2'>Shortlist this property for now & easily come back to it later.</CustomText>
+                                                                </Box>
+                                                                <Box sx={{ background: theme ? "#FFF" : "#F9F6F4", p: 2, borderRadius: '50%' }}>{isPropertyDetail?.isWishlisted ? (<FaHeart color='#FF6400' style={{ cursor: 'pointer' }} onClick={() => {
+                                                                    dispatch(wishListStoreApi({ user: user?._id, property: isPropertyDetail?._id })).then(() => {
+                                                                        dispatch(PropertyWishListToggle({ ...isPropertyDetail, isWishlisted: isPropertyDetail?.isWishlisted ? false : true }))
+                                                                    })
+                                                                }} />) : (<FaRegHeart color='#FF6400' onClick={() => {
+                                                                    dispatch(wishListStoreApi({ user: user?._id, property: isPropertyDetail?._id })).then(() => {
+                                                                        dispatch(PropertyWishListToggle({ ...isPropertyDetail, isWishlisted: isPropertyDetail?.isWishlisted ? false : true }))
+                                                                    })
+                                                                }} style={{ cursor: 'pointer' }} />)}</Box>
+                                                            </Stack>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Box>
+                                            </Form>
+                                        )
+                                    }}
                                 </Formik>
                             </Box>
                         </Grid>

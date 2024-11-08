@@ -4,7 +4,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import BackToTopButton from "./components/common/BackToTopButton";
 import Footer from "./components/common/Footer";
 import Navbar from "./components/common/Navbar";
-import { HomeTwo, HomeThree, About, AboutTwo, Services, ServicesTwo, Property, PropertyTwo, PropertyThree, PropertyFour, PropertyFive, PropertySix, Blog, BlogTwo, BlogThree, BlogFour, Contact, Portifolio, PortifolioTwo, Team, Faqs, PageNotFound, Home,PropertyDetails } from "./pages";
+import { HomeTwo, HomeThree, About, AboutTwo, Services, ServicesTwo, Property, PropertyTwo, PropertyThree, PropertyFour, PropertyFive, PropertySix, Blog, BlogTwo, BlogThree, BlogFour, Contact, Portifolio, PortifolioTwo, Team, Faqs, PageNotFound, Home,PropertyDetails,Profile } from "./pages";
 import Dropdown from "./components/common/DropDown";
 import NewsLetter from "./components/common/NewsLetter";
 import Loader from "./components/common/Loader";
@@ -15,6 +15,7 @@ import PublicRoute from "./Guard/PublicRoute";
 import { appAxios } from "./services/appAxios";
 import { logout } from "./store/Slices/authSlice";
 import { toastNotification } from "./components/CustomToast/CustomToast";
+import PrivateRoute from "Guard/PrivateRoute";
 function App() {
   const location = useLocation();
   const [showButton, setShowButton] = useState(false);
@@ -77,7 +78,7 @@ function App() {
       <Navbar />
       <Dropdown />
       <div
-        className="min-h-screen pb-40"
+        className={`min-h-screen ${location && location.pathname === '/profile' ? '' : 'pb-40' }`}
         onClick={handleCloseDropdown}
         onMouseOver={() => dispatch(closeDropdown())}
       >
@@ -107,6 +108,7 @@ function App() {
           <Route path="/team" element={<Team />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="*" element={<PageNotFound />} />
@@ -114,7 +116,7 @@ function App() {
       </div>
       {location && (location.pathname === '/signin' || location.pathname === '/signup') ? null : (
       <div className="px-[2%] md:px-[6%] bg-card-dark border border-card-dark">
-        <NewsLetter />
+       {location && (location.pathname === '/profile') ? null : <NewsLetter />}
         <div className="mt-20">
           <Footer />
         </div>

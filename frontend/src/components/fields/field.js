@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { TextField, IconButton, InputAdornment, FormControl, Button, Typography, InputLabel, Select as MUISelect, MenuItem, FormHelperText, Divider, Chip } from "@mui/material";
+import { TextField, IconButton, InputAdornment, FormControl, Button, Typography, InputLabel, Select as MUISelect, MenuItem, FormHelperText, Divider, Chip, FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 // TextInput component
 export const TextInput = ({ name, onChange, value, label, ...props }) => {
@@ -35,6 +35,13 @@ export const TextInput = ({ name, onChange, value, label, ...props }) => {
             },
             '& .MuiInputBase-input': {
               color:'#FFF' // White text color inside input field
+            },
+            '& .Mui-disabled': {
+              color:'#d3d3d3 !important',
+              WebkitTextFillColor:'#d3d3d3 !important'
+            },
+            '& .MuiInputBase-root:before': {
+              borderColor:'#FFF'
             },
             '& .MuiFormHelperText-root': {
               marginLeft: 0,// White helper text color
@@ -71,6 +78,40 @@ export const TextInput = ({ name, onChange, value, label, ...props }) => {
       }}
       {...props}
     />
+  );
+};
+
+export const CustomCheckBox = ({ name, onChange, value, label, ...props }) => {
+  const darkMode = useSelector((state) => state.ui.darkMode);
+  return (
+    <FormGroup>
+      <FormControlLabel
+        control={
+          <Checkbox
+            name={name}
+            onChange={onChange}
+            checked={value}
+            sx={{
+              color: darkMode ? '#d3d3d3' : '#131313', // Checkbox color
+              '&.Mui-checked': {
+                color: darkMode ? '#fff' : '#000', // Checked state color
+              },
+              '& .MuiSvgIcon-root': {
+                fontSize: 22, // Adjust size if needed
+              },
+            }}
+            {...props}
+          />
+        }
+        label={label}
+        sx={{
+          color: darkMode ? '#fff' : '#131313', // Label color
+          '& .MuiFormControlLabel-label': {
+            fontSize: 12, // Adjust label font size if needed
+          },
+        }}
+      />
+    </FormGroup>
   );
 };
 
@@ -114,8 +155,15 @@ export const IconInput = ({
               '&.Mui-focused fieldset': { borderColor: '#fff' }, // White border color on focus
               '& input': { color: '#fff' }, // White text color inside input field
             },
+            '& .MuiInputBase-root:before': {
+              borderColor:'#FFF'
+            },
             '& .MuiInputBase-input': {
               color:'#FFF' // White text color inside input field
+            },
+            '& .Mui-disabled': {
+              color:'#d3d3d3 !important',
+              WebkitTextFillColor:'#d3d3d3 !important'
             },
             '& .MuiFormHelperText-root': {
               marginLeft: 0,// White helper text color
@@ -206,6 +254,13 @@ export const PasswordInput = ({ name, onChange, value, label, ...props }) => {
               },
               '& .MuiInputBase-input': {
               color:'#FFF' // White text color inside input field
+            },
+            '& .MuiInputBase-root:before': {
+              borderColor:'#FFF'
+            },
+            '& .Mui-disabled': {
+              color:'#d3d3d3 !important',
+              WebkitTextFillColor:'#d3d3d3 !important'
             },
               '& .MuiOutlinedInput-root': {
                 '& fieldset': { borderColor: '#fff' }, // White border color

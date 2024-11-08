@@ -5,6 +5,7 @@ import authReducer from "./Slices/authSlice";
 import uiReducer from "./Slices/uiSlice";
 import dataReducer from "./Slices/dataSlice";
 import propertyReducer from "./Slices/propertySlice";
+import profileReducer from "./Slices/profileSlice";
 
 const reducer = combineReducers({
   auth: persistReducer(
@@ -48,6 +49,16 @@ const reducer = combineReducers({
       timeout: 20000,
     },
     propertyReducer
+  ),
+  profile: persistReducer(
+    {
+      key: "profile",
+      storage,
+      keyPrefix: "estate-client-",
+      debug: false,
+      timeout: 20000,
+    },
+    profileReducer
   ),
 });
 

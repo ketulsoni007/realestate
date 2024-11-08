@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 import Property from "../../models/Property.js";
+import Contact from "../../models/Contact.js";
+import WishList from "../../models/WishList.js";
 
 dotenv.config();
 
@@ -154,13 +156,14 @@ export const propertyFilterController = async (req, res) => {
 export const propertyDetailController = async (req, res) => {
   try {
     const { id } = req.params;
+    const {user} = req.query;
 
     const property = await Property.findById(id)
-    .populate('address.country address.state address.city address.area')
+      .populate('address.country address.state address.city address.area')
       .populate('images')
       .populate({
-        path:'owner',
-        select:'_id first_name last_name email phone_number profile_picture agency_name license_number'
+        path: 'owner',
+        select: '_id first_name last_name email phone_number profile_picture agency_name license_number',
       })
       .exec();
 
@@ -168,10 +171,67 @@ export const propertyDetailController = async (req, res) => {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    res.status(200).json(property);
+    let alreadyContact = false;
+    if(user && user !== 'undefined'){
+      const alreadyContactEntry = await Contact.findOne({ user: user, property: property._id });
+      alreadyContact = !!alreadyContactEntry; // Convert to boolean (true if exists, false otherwise)
+    }
+    let isWishlisted = false;
+    if(user && user !== 'undefined'){
+      const wishlistEntry = await WishList.findOne({ user: user, property: property._id });
+      isWishlisted = !!wishlistEntry; // Convert to boolean (true if exists, false otherwise)
+    }
+    const propertyData = {
+      ...property.toObject(),
+      isWishlisted,
+      alreadyContact,
+    };
+
+    res.status(200).json(propertyData);
   } catch (error) {
     console.error("Error fetching property details:", error);
     res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const propertyContactController = async (req, res) => {
+  try {
+    const { user,seller,property,name,phone,email,agree,inquiry } = req.body;
+
+    const existingContact = await Contact.findOne({ user,property });
+    if (existingContact) {
+      return res.status(410).json({message:"You already have requested to contact this agents!"});
+    }
+    const newContact = new Contact({
+      user,
+      seller,
+      property,
+      name : name ? name : '',
+      email : email ? email : '',
+      accept: agree ? true : false,
+      inquiry,
+    });
+    new WishList({
+      property:property,
+      user:user,
+      type:'seen',
+    }).save();
+    await newContact.save();
+    res.status(200).json({message: "Agent Contacted SuccessFully" });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(422).json({
+        status: false,
+        message: "Validation failed",
+        errors: error.errors,
+      });
+    }
+
+    console.error("Error creating rating:", error);
+    res.status(500).json({
+      status: false,
       message: "Internal server error",
     });
   }

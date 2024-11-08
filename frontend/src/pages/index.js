@@ -22,3 +22,4 @@ export { default as PortifolioTwo } from "./Page/PortifolioTwo";
 export { default as Team } from "./Page/Team";
 export { default as Faqs } from "./Page/Faqs";
 export { default as PageNotFound } from "./Page/PageNotFound";
+export { default as Profile } from "./Page/Profile";

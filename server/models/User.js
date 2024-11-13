@@ -15,21 +15,21 @@ const userSchema = new Schema({
   updated_at: { type: Date, default: Date.now },
 
   // Admin-specific fields
-  permissions: [{ type: String }],
-  is_superadmin: { type: Boolean, default: false },
+  // permissions: [{ type: String }],
+  // is_superadmin: { type: Boolean, default: false },
   // Agent/Broker-specific fields
   agency_name: { type: String },
-  assigned_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
+  // assigned_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
   commission_rate: { type: Number },
   license_number: { type: String },
 
   // Client-specific fields
-  saved_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
-  viewed_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
-  preferences: {
-    location: { type: String },
-    price_range: { type: Number }
-  }
+  // saved_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
+  // viewed_properties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
+  // preferences: {
+  //   location: { type: String },
+  //   price_range: { type: Number }
+  // }
 });
 
 const User = mongoose.model('User', userSchema);

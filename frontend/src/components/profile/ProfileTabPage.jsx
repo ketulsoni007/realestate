@@ -102,12 +102,17 @@ const ProfileTabPage = () => {
           backgroundRepeat: "repeat-y repeat-x",
           backgroundSize: "contain",
           minHeight: 'calc(100vh - 84px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+          // display: 'flex',
+          // justifyContent: 'center',
+          // alignItems: 'center',
+          width:'100%'
         }}>
-        <Box sx={{ backgroundColor: theme ? "#1C252E" : "#FFF" }} p={2} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-          <Box sx={{ width: { xs: '100%', sm: '90%', md: '720px', lg: '900px' } }}>
+        <Box sx={{ backgroundColor: theme ? "#1C252E" : "#FFF" }} p={2} py={5} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          <Box 
+          sx={{ 
+            width: 'calc(100% - 100px)'
+             }}
+          >
             <Formik initialValues={initialValues} validationSchema={validationSchema} enableReinitialize onSubmit={handleSubmit}>
               {({ errors, touched, isSubmitting, values, setFieldValue }) => {
                 return (

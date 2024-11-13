@@ -17,6 +17,7 @@ import adminModuleRoute from "./routes/AdminRoute/adminModuleRoute.js";
 import adminSubModuleRoute from "./routes/AdminRoute/adminSubModuleRoute.js";
 import adminPermissionRoute from "./routes/AdminRoute/adminPermissionRoute.js";
 import adminAccessRoute from "./routes/AdminRoute/adminAccessRoute.js";
+import notificationRoute from "./routes/AdminRoute/notificationRoute.js";
 
 
 const app = express();
@@ -49,6 +50,7 @@ app.use("/api/v1/admin/module", adminModuleRoute);
 app.use("/api/v1/admin/submodule", adminSubModuleRoute);
 app.use("/api/v1/admin/permission", adminPermissionRoute);
 app.use("/api/v1/admin/access", adminAccessRoute);
+app.use("/api/v1/admin/notification", notificationRoute);
 
 const PORT = process.env.PORT || 8080;
 

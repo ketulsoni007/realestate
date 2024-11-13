@@ -223,8 +223,11 @@ const Navbar = () => {
                 }}
                 transformOrigin={{ horizontal: "right", vertical: "top" }}
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                <MenuItem onClick={handleCloseAcoount}>
-                  <Avatar /> Profile
+                <MenuItem onClick={()=>{
+                  navigate('/profile');
+                  setAnchorEl(null);
+                }}>
+                  <Avatar src={`${config.IMAGE_URL}/user/${user?.profile_picture}`} /> Profile
                 </MenuItem>
                 <MenuItem onClick={handleCloseAcoount}>
                   <Avatar /> My account

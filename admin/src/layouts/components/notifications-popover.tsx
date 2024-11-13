@@ -1,6 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -21,7 +21,10 @@ import { fToNow } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
+import { useAppDispatch, useAppSelector } from 'src/store';
+import { notificationCountApi, notificationListApi } from 'src/store/Slices/commonSlice';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { CommonGradientSpinner } from 'src/components/InputFields/field';
 // ----------------------------------------------------------------------
 
 type NotificationItemProps = {
@@ -40,14 +43,21 @@ export type NotificationsPopoverProps = IconButtonProps & {
 
 export function NotificationsPopover({ data = [], sx, ...other }: NotificationsPopoverProps) {
   const [notifications, setNotifications] = useState(data);
+  const dispatch = useAppDispatch();
+  const notificationCount = useAppSelector((state)=>state.common.isNotificatioCount);
+  const isApiStatus = useAppSelector((state)=>state.common.isApiStatus);
+  const notificationListLoading = isApiStatus?.notificationListApi === 'loading';
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpenPopover(event.currentTarget);
-  }, []);
+    const target = event.currentTarget;
+    dispatch(notificationListApi({})).then(() => {
+      setOpenPopover(target);
+    });
+  }, [dispatch, setOpenPopover]);
 
   const handleClosePopover = useCallback(() => {
     setOpenPopover(null);
@@ -62,6 +72,10 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     setNotifications(updatedNotifications);
   }, [notifications]);
 
+  useEffect(()=>{
+    dispatch(notificationCountApi({}));
+  },[]);
+
   return (
     <>
       <IconButton
@@ -70,7 +84,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         sx={sx}
         {...other}
       >
-        <Badge badgeContent={totalUnRead} color="error">
+        <Badge badgeContent={notificationListLoading ? <CommonGradientSpinner size={15}/> : notificationCount ?? 0} color={notificationListLoading ? 'default' : 'error'}>
           <Iconify width={24} icon="solar:bell-bing-bold-duotone" />
         </Badge>
       </IconButton>
@@ -96,7 +110,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="subtitle1">Notifications</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              You have {totalUnRead} unread messages
+              You have {notificationCount} unread messages
             </Typography>
           </Box>
 
@@ -114,18 +128,18 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         <Scrollbar fillContent sx={{ minHeight: 240, maxHeight: { xs: 360, sm: 'none' } }}>
           <List
             disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                New
-              </ListSubheader>
-            }
+            // subheader={
+            //   <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
+            //     New
+            //   </ListSubheader>
+            // }
           >
             {notifications.slice(0, 2).map((notification,index) => (
               <NotificationItem key={index} notification={notification} />
             ))}
           </List>
 
-          <List
+          {/* <List
             disablePadding
             subheader={
               <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
@@ -136,7 +150,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
             {notifications.slice(2, 5).map((notification) => (
               <NotificationItem key={notification.id} notification={notification} />
             ))}
-          </List>
+          </List> */}
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

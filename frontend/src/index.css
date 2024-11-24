@@ -127,11 +127,11 @@ a.active {
 
 /* Filter dialog and modal */
 .filter-modal {
-  @apply fixed top-0 left-0 z-50 w-full h-full transition-opacity opacity-0 pointer-events-none bg-black/50 md:static md:opacity-100 md:pointer-events-auto md:bg-transparent;
+  @apply fixed top-0 left-0 z-50 w-full h-full transition-opacity opacity-0 pointer-events-none bg-black/50 lg:static lg:opacity-100 lg:pointer-events-auto lg:bg-transparent;
 }
 
 .filter-dialog {
-  @apply absolute right-0  p-3 md:p-0 bg-white dark:bg-card-dark h-screen max-w-[300px] translate-x-[500px] w-full max-h-screen overflow-auto transition-transform md:static md:max-w-full md:translate-x-0 md:max-h-fit md:h-fit md:bg-main-bg md:dark:!bg-main-dark;
+  @apply absolute right-0  p-3 lg:p-0 bg-white dark:bg-card-dark h-screen max-w-[300px] translate-x-[500px] w-full max-h-screen overflow-auto transition-transform lg:static lg:max-w-full lg:translate-x-0 lg:max-h-fit lg:h-fit lg:bg-main-bg lg:dark:!bg-main-dark;
 }
 
 .mobile-modal.open,

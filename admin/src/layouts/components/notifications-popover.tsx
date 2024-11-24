@@ -25,6 +25,7 @@ import { useAppDispatch, useAppSelector } from 'src/store';
 import { notificationCountApi, notificationListApi } from 'src/store/Slices/commonSlice';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { CommonGradientSpinner } from 'src/components/InputFields/field';
+import { config } from 'src/config-global';
 // ----------------------------------------------------------------------
 
 type NotificationItemProps = {
@@ -45,6 +46,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
   const [notifications, setNotifications] = useState(data);
   const dispatch = useAppDispatch();
   const notificationCount = useAppSelector((state)=>state.common.isNotificatioCount);
+  const isNotificatioList = useAppSelector((state)=>state.common.isNotificatioList);
   const isApiStatus = useAppSelector((state)=>state.common.isApiStatus);
   const notificationListLoading = isApiStatus?.notificationListApi === 'loading';
 
@@ -134,7 +136,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
             //   </ListSubheader>
             // }
           >
-            {notifications.slice(0, 2).map((notification,index) => (
+            {isNotificatioList.map((notification:any,index:number) => (
               <NotificationItem key={index} notification={notification} />
             ))}
           </List>
@@ -167,8 +169,10 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
 // ----------------------------------------------------------------------
 
-function NotificationItem({ notification }: { notification: NotificationItemProps }) {
-  const { avatarUrl, title } = renderContent(notification);
+function NotificationItem({ notification }: { notification: any }) {
+  const userAvatarUrl = notification?.user?.profile_picture ? `${config?.IMAGE_URL}/user/${notification?.user?.profile_picture}` : '';
+  console.log('userAvatarUrl: ', userAvatarUrl);
+  const { title } = renderContent(notification);
 
   return (
     <ListItemButton
@@ -176,13 +180,13 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
         py: 1.5,
         px: 2.5,
         mt: '1px',
-        ...(notification.isUnRead && {
+        ...(!(notification.isRead) && {
           bgcolor: 'action.selected',
         }),
       }}
     >
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: 'background.neutral' }}>{avatarUrl}</Avatar>
+        <Avatar sx={{ bgcolor: 'background.neutral' }} src={userAvatarUrl}/>
       </ListItemAvatar>
       <ListItemText
         primary={title}
@@ -198,7 +202,7 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
             }}
           >
             <Iconify width={14} icon="solar:clock-circle-outline" />
-            {fToNow(notification.postedAt)}
+            {fToNow(notification.createdAt)}
           </Typography>
         }
       />
@@ -208,58 +212,34 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
 
 // ----------------------------------------------------------------------
 
-function renderContent(notification: NotificationItemProps) {
+function renderContent(notification: any) {
+  console.log('notificationC: ', notification);
+
+  // Construct a dynamic title based on the inquiry type
+  const inquiryMessage = (() => {
+    switch (notification?.inquiry) {
+      case 'visit':
+        return `${notification?.user ? notification?.user?.first_name + " " + notification?.user?.last_name : notification?.name} wants to visit ${notification?.property?.title}`;
+      case 'contact':
+        return `${notification?.user ? notification?.user?.first_name + " " + notification?.user?.last_name : notification?.name} wants to contact you regarding ${notification?.property?.title}`;
+      case 'detail':
+        return `${notification?.user ? notification?.user?.first_name + " " + notification?.user?.last_name : notification?.name} is asking for details about ${notification?.property?.title}`;
+      default:
+        return 'You have a new notification';
+    }
+  })();
+
+  // Title with inquiry and description
   const title = (
     <Typography variant="subtitle2">
-      {notification.title}
-      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
-        &nbsp; {notification.description}
+      {inquiryMessage}
+      <Typography component="span" variant="body2" sx={{ color: 'text.secondary',display:'block' }}>
+        {notification?.property.address?.street}
       </Typography>
     </Typography>
   );
 
-  if (notification.type === 'order-placed') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-package.svg"
-        />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'order-shipped') {
-    return {
-      avatarUrl: (
-        <img
-          alt={notification.title}
-          src="/assets/icons/notification/ic-notification-shipping.svg"
-        />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'mail') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-mail.svg" />
-      ),
-      title,
-    };
-  }
-  if (notification.type === 'chat-message') {
-    return {
-      avatarUrl: (
-        <img alt={notification.title} src="/assets/icons/notification/ic-notification-chat.svg" />
-      ),
-      title,
-    };
-  }
   return {
-    avatarUrl: notification.avatarUrl ? (
-      <img alt={notification.title} src={notification.avatarUrl} />
-    ) : null,
     title,
   };
 }

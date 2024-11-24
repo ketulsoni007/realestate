@@ -108,6 +108,7 @@ const initialState = {
     isPropertySearchList: [],
     isPropertyFilterList: {},
     isPropertyDetail: {},
+    isPropertyFilter:{},
     isSearchFilterText: '',
     isApiStatus: {
         propertyListApi: "",
@@ -133,6 +134,9 @@ const propertySlice = createSlice({
         },
         PropertyWishListToggle: (state, action) => {
             state.isPropertyDetail = action.payload;
+        },
+        SetPropertyFilter: (state, action) => {
+            state.isPropertyFilter = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -215,5 +219,5 @@ const propertySlice = createSlice({
     },
 });
 
-export const { reset, PropertySearchListReset, PropertySearchText,PropertyWishListToggle } = propertySlice.actions;
+export const { reset, PropertySearchListReset, PropertySearchText,PropertyWishListToggle,SetPropertyFilter } = propertySlice.actions;
 export default propertySlice.reducer;

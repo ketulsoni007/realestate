@@ -4,7 +4,7 @@ import State from "../../models/State.js";
 export const notificationListController = async (req, res) => {
     const userId = req.userId;
     try {
-        const notifications = await Contact.find({ seller: userId });
+        const notifications = await Contact.find({ seller: userId }).populate({ path: 'user', select: '_id first_name last_name profile_picture' }).populate({ path: 'property', select: '_id title status address.street' });
         res.status(200).json(notifications);
     } catch (error) {
         console.error("Error getting State:", error);

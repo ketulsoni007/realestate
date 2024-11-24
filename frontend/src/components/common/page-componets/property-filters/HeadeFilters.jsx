@@ -1,8 +1,10 @@
 import React from "react";
 import { FaList } from "react-icons/fa";
 import { FiFilter, FiGrid } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import { useDispatch } from "react-redux";
 import { openFilterMenu } from "../../../../store/Slices/uiSlice";
+import { propertyFilterListApi } from "store/Slices/propertySlice";
 
 const HeadeFilters = ({ layout, setLayout }) => {
   const dispatch = useDispatch();
@@ -27,7 +29,13 @@ const HeadeFilters = ({ layout, setLayout }) => {
             <FaList />
           </div>
           <div
-            className="grid w-10 h-10 md:hidden rounded-xl place-items-center bg-slate-100 sm:cursor-pointer hover:bg-slate-200 transition-a dark:bg-card-dark"
+            className={`w-10 h-10 rounded-xl grid place-items-center bg-slate-100 sm:cursor-pointer hover:bg-slate-200 transition-a dark:bg-card-dark`}
+            onClick={() => dispatch(propertyFilterListApi({}))}
+          >
+            <IoMdClose />
+          </div>
+          <div
+            className="grid w-10 h-10 lg:hidden rounded-xl place-items-center bg-slate-100 sm:cursor-pointer hover:bg-slate-200 transition-a dark:bg-card-dark"
             onClick={() => dispatch(openFilterMenu())}
           >
             <FiFilter />

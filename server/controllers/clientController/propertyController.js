@@ -115,27 +115,56 @@ export const propertySearchController = async (req, res) => {
 };
 
 export const propertyFilterController = async (req, res) => {
+  console.log('req.body', req.body);
+  
   try {
-    const rowsPerPage = 8; // Set default number of rows per page
-    const page = parseInt(req.query.page) || 0; // Get page from query params, default to 0 if undefined
+    const rowsPerPage = 8; // Default rows per page
+    const page = parseInt(req.query.page) || 0; // Current page
+    const filters = {}; // Object to store dynamic filters
 
-    const properties = await Property.find({})
+    // Destructure the filters from the request body
+    const { category, priceRange, purpose, bathrooms, beds, type, budget } = req.body;
+
+    // Add filters dynamically based on the request
+    if (category) filters.type = category;
+    if (purpose) filters.status = purpose;
+    if (bathrooms) filters.bathrooms = parseInt(bathrooms);
+    if (beds) filters.bedrooms = parseInt(beds);
+    if (type) filters.type = type;
+
+    // Handle price range or budget filters
+    if (priceRange) {
+      const { min, max } = JSON.parse(priceRange);
+      filters.price = {
+        ...(min && { $gte: min }),
+        ...(max && { $lte: max }),
+      };
+    } else if (budget) {
+      const [min, max] = JSON.parse(budget);
+      filters.price = {
+        ...(min !== null && { $gte: min }),
+        ...(max !== null && { $lte: max }),
+      };
+    }
+
+    // Fetch filtered properties
+    const properties = await Property.find(filters)
       .populate({
         path: 'images',
         match: { is_primary: true },
         select: '_id image is_primary',
       })
       .sort({ _id: 1 })
-      .skip(page * rowsPerPage) // Skip documents based on page number
-      .limit(rowsPerPage); // Limit the number of documents to rowsPerPage
+      .skip(page * rowsPerPage)
+      .limit(rowsPerPage);
 
-    // Count total documents for pagination metadata
-    const totalDocuments = await Property.countDocuments({});
+    // Count total documents based on filters
+    const totalDocuments = await Property.countDocuments(filters);
 
     // Calculate total pages
     const totalPages = Math.ceil(totalDocuments / rowsPerPage);
 
-    // Send properties with pagination metadata
+    // Send response with properties and pagination metadata
     res.status(200).json({
       properties,
       pagination: {
@@ -146,12 +175,13 @@ export const propertyFilterController = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching properties:", error);
+    console.error('Error fetching properties:', error);
     res.status(500).json({
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
+
 
 export const propertyDetailController = async (req, res) => {
   try {

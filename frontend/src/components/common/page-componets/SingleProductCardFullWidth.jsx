@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CardHoverIcons from "./CardHoverIcons";
 import CardLabels from "./CardLabels";
 import config from "config/config";
+import useWindowWidth from "hooks/windowWidth";
 
 const SingleProductCardFullWidth = ({
   _id,
@@ -18,17 +19,19 @@ const SingleProductCardFullWidth = ({
   showLabels,
   type,
 }) => {
-  const imageLinks = images && images.length > 0 ? `${config.IMAGE_URL}/property/${images[0].image}` : '';
   const navigate = useNavigate();
+  const width = useWindowWidth();
+  const imageLinks = images && images.length > 0 ? `${config.IMAGE_URL}/property/${images[0].image}` : '';
   return (
     <div className="relative grid grid-cols-1 gap-3 mt-3 overflow-hidden border rounded-lg shadow-light sm:grid-cols-3 md:grid-cols-4 dark:border-card-dark group">
       <div className="sm:col-span-1">
         <div className="group !opacity-100 overflow-hidden relative h-full">
-          <Link to="/" className="!opacity-100">
+          <Link to={`/property/${_id}`} className="!opacity-100">
             <img
               src={imageLinks}
               alt={title}
-              className="object-cover w-full h-full group-hover:scale-125 transition-a"
+              className="object-cover h-full w-full group-hover:scale-125 transition-a"
+              style={{width :'100%',height:'300px',objectFit:'cover'}}
             />
           </Link>
           <CardHoverIcons />
@@ -69,7 +72,6 @@ const SingleProductCardFullWidth = ({
               <p className="text-sm">{square_footage}</p>
             </div>
           </div>
-
           <div className="mt-4 flex-center-between">
             <h1 className="text-lg font-semibold text-primary">${price}</h1>
             <button className="btn btn-secondary" onClick={()=>navigate(`/property/${_id}`)}>details</button>
